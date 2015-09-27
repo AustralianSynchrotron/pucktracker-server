@@ -4,7 +4,9 @@
   "description": "Puck tracker server",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "babel-node index.js",
+    "test": "mocha --compilers js:babel/register --recursive",
+    "test:watch": "npm run test -- --watch"
   },
   "repository": {
     "type": "git",
@@ -15,5 +17,13 @@
   "bugs": {
     "url": "https://github.com/AustralianSynchrotron/pucktracker-server/issues"
   },
-  "homepage": "https://github.com/AustralianSynchrotron/pucktracker-server#readme"
+  "homepage": "https://github.com/AustralianSynchrotron/pucktracker-server#readme",
+  "dependencies": {
+    "socket.io": "^1.3.7"
+  },
+  "devDependencies": {
+    "babel": "^5.8.23",
+    "chai": "^3.3.0",
+    "mocha": "^2.3.3"
+  }
 }
