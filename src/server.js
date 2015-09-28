@@ -47,6 +47,19 @@ export default function startServer() {
           })
           break
         }
+        case 'SET_PUCK_RECEPTACLE': {
+          Puck.findOneAndUpdate(
+            {name: action.puck},
+            {
+              receptacle: action.receptacle,
+              receptacleType: action.receptacleType,
+              slot: action.slot,
+            }
+          ).then(() => {
+            socket.broadcast.emit('action', action)
+          })
+          break
+        }
       }
     })
 

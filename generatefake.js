@@ -18,7 +18,7 @@ Puck.remove().then(() => {
   return Puck.create([
     {name: 'ASP001', receptacleType: 'adaptor', receptacle: 'AS-01', slot: 'A'},
     {name: 'ASP002', receptacleType: 'dewar', receptacle: '1001'},
-    {name: 'ASP003'},
+    {name: 'ASP003', receptacleType: 'adaptor', receptacle: 'AS-01', slot: 'C'},
   ])
 }).then(() => {
   console.log('pucks added')
