@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "babel-node index.js",
+    "generatefake": "babel-node generatefake.js",
     "test": "mocha --compilers js:babel/register --recursive",
     "test:watch": "npm run test -- --watch"
   },
@@ -19,6 +20,7 @@
   },
   "homepage": "https://github.com/AustralianSynchrotron/pucktracker-server#readme",
   "dependencies": {
+    "mongoose": "^4.1.8",
     "socket.io": "^1.3.7"
   },
   "devDependencies": {
