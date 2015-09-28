@@ -1,17 +1,29 @@
 import mongoose from 'mongoose'
 import Adaptor from './src/models/Adaptor'
+import Dewar from './src/models/Dewar'
 import Puck from './src/models/Puck'
 import Port from './src/models/Port'
 
 mongoose.connect('mongodb://localhost/pucktracker_dev')
 
 Adaptor.remove().then(() => {
-  return Adaptor.create([
-    {name: 'AS-01', location: 'MX1', position: 'Left'},
-    {name: 'AS-02'},
-  ])
+  const adaptors = Array.apply(null, Array(24)).map((e, idx) => {
+    const n = idx + 1
+    const pad = n < 10 ? '0' : ''
+    return {name: `AS-${pad}${n}`}
+  })
+  return Adaptor.create(adaptors)
 }).then(() => {
   console.log('adaptors added')
+})
+
+Dewar.remove().then(() => {
+  return Dewar.create([
+    {name: '1001'},
+    {name: '1002'},
+  ])
+}).then(() => {
+  console.log('dewars added')
 })
 
 Puck.remove().then(() => {

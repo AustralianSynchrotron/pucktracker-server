@@ -1,6 +1,7 @@
 import Server from 'socket.io'
 import mongoose from 'mongoose'
 import Adaptor from './models/Adaptor'
+import Dewar from './models/Dewar'
 import Puck from './models/Puck'
 import Port from './models/Port'
 
@@ -13,6 +14,11 @@ export default function startServer() {
 
     Adaptor.find().then(adaptors => {
       const action = {type: 'SET_ADAPTORS', adaptors, broadcast: false}
+      socket.emit('action', action)
+    })
+
+    Dewar.find().then(dewars => {
+      const action = {type: 'SET_DEWARS', dewars, broadcast: false}
       socket.emit('action', action)
     })
 
