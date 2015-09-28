@@ -27,14 +27,26 @@ export default function startServer() {
     })
 
     socket.on('action', action => {
-      if (action.type === 'SET_ADAPTOR_PLACE') {
-        Adaptor.findOneAndUpdate(
-          {name: action.adaptor},
-          {location: action.location, position: action.position}
-        ).then(() => {
-          action['broadcast'] = false
-          socket.broadcast.emit('action', action)
-        })
+      action['broadcast'] = false
+      switch (action.type) {
+        case 'SET_ADAPTOR_PLACE': {
+          Adaptor.findOneAndUpdate(
+            {name: action.adaptor},
+            {location: action.location, position: action.position}
+          ).then(() => {
+            socket.broadcast.emit('action', action)
+          })
+          break
+        }
+        case 'SET_PORT_STATE': {
+          Port.findOneAndUpdate(
+            {container: action.container, number: action.number},
+            {state: action.state}
+          ).then(() => {
+            socket.broadcast.emit('action', action)
+          })
+          break
+        }
       }
     })
 
