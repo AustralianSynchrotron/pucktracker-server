@@ -19,8 +19,8 @@ Adaptor.remove().then(() => {
 
 Dewar.remove().then(() => {
   return Dewar.create([
-    {name: '1001'},
-    {name: '1002'},
+    {name: '1001', epn: '123a'},
+    {name: '1002', epn: '456b'},
   ])
 }).then(() => {
   console.log('dewars added')

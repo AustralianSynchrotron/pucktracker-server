@@ -76,6 +76,21 @@ export default function startServer() {
           })
           break
         }
+        case 'ADD_DEWAR': {
+          Dewar.create(action.dewar).then(() => {
+            socket.broadcast.emit('action', action)
+          })
+          break
+        }
+        case 'UPDATE_DEWAR': {
+          Dewar.findOneAndUpdate(
+            {name: action.dewar},
+            action.update
+          ).then(() => {
+            socket.broadcast.emit('action', action)
+          })
+          break
+        }
       }
     })
 

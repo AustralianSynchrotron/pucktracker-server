@@ -1,7 +1,7 @@
-import mongoose, {Schema} from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 
 const schema = new Schema({
-  name: String,
+  name: {type: String, index: {unique: true}},
   location: String,
   position: String,
 })
