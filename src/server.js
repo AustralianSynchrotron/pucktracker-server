@@ -53,6 +53,16 @@ export default function startServer() {
           })
           break
         }
+        case 'SET_MULTIPLE_PORT_STATES': {
+          Port.update(
+            {container: action.container, number: {$in: action.numbers}},
+            {state: action.state},
+            {multi: true }
+          ).then(() => {
+            socket.broadcast.emit('action', action)
+          })
+          break
+        }
         case 'SET_PUCK_RECEPTACLE': {
           Puck.findOneAndUpdate(
             {name: action.puck},
