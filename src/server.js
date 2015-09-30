@@ -91,6 +91,31 @@ export default function startServer() {
           })
           break
         }
+        case 'ADD_PUCK': {
+          Puck.create(action.puck).then(() => {
+            let ports = []
+            for (let number = 1; number <= 16; number += 1) {
+              ports.push({
+                containerType: 'puck',
+                container: action.puck.name,
+                number,
+              })
+            }
+            return Port.create(ports)
+          }).then(() => {
+            socket.broadcast.emit('action', action)
+          })
+          break
+        }
+        case 'UPDATE_PUCK': {
+          Puck.findOneAndUpdate(
+            {name: action.puck},
+            action.update
+          ).then(() => {
+            socket.broadcast.emit('action', action)
+          })
+          break
+        }
       }
     })
 

@@ -37,24 +37,17 @@ Puck.remove().then(() => {
 })
 
 Port.remove().then(() => {
-  return Port.create([
-    {container: 'ASP001', containerType: 'puck', number: 1, state: 'full'},
-    {container: 'ASP001', containerType: 'puck', number: 2, state: 'full'},
-    {container: 'ASP001', containerType: 'puck', number: 3, state: 'full'},
-    {container: 'ASP001', containerType: 'puck', number: 4, state: 'full'},
-    {container: 'ASP001', containerType: 'puck', number: 5, state: 'full'},
-    {container: 'ASP001', containerType: 'puck', number: 6, state: 'full'},
-    {container: 'ASP001', containerType: 'puck', number: 7, state: 'full'},
-    {container: 'ASP001', containerType: 'puck', number: 8, state: 'full'},
-    {container: 'ASP001', containerType: 'puck', number: 9, state: 'full'},
-    {container: 'ASP001', containerType: 'puck', number: 10, state: 'full'},
-    {container: 'ASP001', containerType: 'puck', number: 11, state: 'full'},
-    {container: 'ASP001', containerType: 'puck', number: 12, state: 'empty'},
-    {container: 'ASP001', containerType: 'puck', number: 13, state: 'empty'},
-    {container: 'ASP001', containerType: 'puck', number: 14, state: 'empty'},
-    {container: 'ASP001', containerType: 'puck', number: 15, state: 'unknown'},
-    {container: 'ASP001', containerType: 'puck', number: 16, state: 'unknown'},
-  ])
+  let ports = []
+  ;['ASP001', 'ASP002', 'ASP003'].forEach(container => {
+    for (let number = 1; number <= 16; number += 1) {
+      ports.push({
+        containerType: 'puck',
+        container,
+        number,
+      })
+    }
+  })
+  return Port.create(ports)
 }).then(() => {
   console.log('ports added')
 })
