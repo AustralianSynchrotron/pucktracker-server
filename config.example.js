@@ -3,6 +3,6 @@ export default {
     db: 'mongodb://localhost/pucktracker_dev',
   },
   production: {
-    db: 'mongodb://10.109.24.100/pucktracker',
+    db: 'mongodb://localhost/pucktracker',
   },
 }
