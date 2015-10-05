@@ -3,8 +3,12 @@ import Adaptor from './src/models/Adaptor'
 import Dewar from './src/models/Dewar'
 import Puck from './src/models/Puck'
 import Port from './src/models/Port'
+import pucks from './pucks'
+import config from './config'
 
-mongoose.connect('mongodb://localhost/pucktracker_dev')
+const env = process.env.NODE_ENV || 'development'
+
+mongoose.connect(config[env].db)
 
 Adaptor.remove().then(() => {
   const adaptors = Array.apply(null, Array(24)).map((e, idx) => {
@@ -27,11 +31,7 @@ Dewar.remove().then(() => {
 })
 
 Puck.remove().then(() => {
-  return Puck.create([
-    {name: 'ASP001', receptacleType: 'adaptor', receptacle: 'AS-01', slot: 'A'},
-    {name: 'ASP002', receptacleType: 'dewar', receptacle: '1001'},
-    {name: 'ASP003', receptacleType: 'adaptor', receptacle: 'AS-01', slot: 'C'},
-  ])
+  return Puck.create(pucks)
 }).then(() => {
   console.log('pucks added')
 })
