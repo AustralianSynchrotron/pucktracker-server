@@ -38,7 +38,8 @@ Puck.remove().then(() => {
 
 Port.remove().then(() => {
   let ports = []
-  ;['ASP001', 'ASP002', 'ASP003'].forEach(container => {
+  pucks.forEach(puck => {
+    const container = puck.name
     for (let number = 1; number <= 16; number += 1) {
       ports.push({
         containerType: 'puck',
