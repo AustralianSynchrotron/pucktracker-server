@@ -33,6 +33,7 @@ export default function startServer(config) {
     })
 
     socket.on('action', action => {
+      if (!action) { return }
       action['broadcast'] = false
       switch (action.type) {
         case 'SET_ADAPTOR_PLACE': {
@@ -115,6 +116,20 @@ export default function startServer(config) {
             socket.broadcast.emit('action', action)
           })
           break
+        }
+        case 'SET_DEWAR_OFFSITE': {
+          Dewar.findOneAndUpdate(
+            {name: action.dewar},
+            {onsite: false}
+          ).then(() => {
+            return Puck.update(
+              {receptacle: action.dewar, receptacleType: 'dewar'},
+              {receptacle: null, receptacleType: null, slot: null},
+              {multi: true }
+            )
+          }).then(() => {
+            socket.broadcast.emit('action', action)
+          })
         }
       }
     })

@@ -10,33 +10,22 @@ const env = process.env.NODE_ENV || 'development'
 
 mongoose.connect(config[env].db)
 
-Adaptor.remove().then(() => {
+const adaptorsPromise = Adaptor.remove().then(() => {
   const adaptors = Array.apply(null, Array(24)).map((e, idx) => {
     const n = idx + 1
     const pad = n < 10 ? '0' : ''
     return {name: `AS-${pad}${n}`}
   })
   return Adaptor.create(adaptors)
-}).then(() => {
-  console.log('adaptors added')
 })
 
-Dewar.remove().then(() => {
-  return Dewar.create([
-    {name: '1001', epn: '123a'},
-    {name: '1002', epn: '456b'},
-  ])
-}).then(() => {
-  console.log('dewars added')
-})
+const dewarsPromise = Dewar.remove()
 
-Puck.remove().then(() => {
+const pucksPromise = Puck.remove().then(() => {
   return Puck.create(pucks)
-}).then(() => {
-  console.log('pucks added')
 })
 
-Port.remove().then(() => {
+const portsPromise = Port.remove().then(() => {
   let ports = []
   pucks.forEach(puck => {
     const container = puck.name
@@ -49,6 +38,7 @@ Port.remove().then(() => {
     }
   })
   return Port.create(ports)
-}).then(() => {
-  console.log('ports added')
 })
+
+Promise.all([adaptorsPromise, dewarsPromise, pucksPromise, portsPromise])
+       .then(() => { console.log('Done'); mongoose.disconnect() })

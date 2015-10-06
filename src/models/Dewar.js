@@ -5,6 +5,7 @@ const schema = new Schema({
   epn: String,
   owner: String,
   note: String,
+  onsite: Boolean,
 })
 
 export default mongoose.model('Dewar', schema)
