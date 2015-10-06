@@ -9,7 +9,7 @@ export default function startServer(config) {
 
   mongoose.connect(config.db)
 
-  const io = new Server().attach(8090)
+  const io = new Server().attach(config.port)
   io.on('connection', socket => {
 
     Adaptor.find().sort({name: 1}).then(adaptors => {
