@@ -5,6 +5,8 @@ const schema = new Schema({
   epn: String,
   owner: String,
   note: String,
+  containerType: String,
+  expectedContainers: String,
   onsite: Boolean,
 })
 
