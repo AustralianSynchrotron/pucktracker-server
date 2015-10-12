@@ -8,6 +8,8 @@ const schema = new Schema({
   lastDewar: String,
   note: String,
   owner: String,
+  institute: String,
+  email: String,
 })
 
 export default mongoose.model('Puck', schema)
