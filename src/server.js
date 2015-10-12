@@ -65,14 +65,15 @@ export default function startServer(config) {
           break
         }
         case 'SET_PUCK_RECEPTACLE': {
-          Puck.findOneAndUpdate(
-            {name: action.puck},
-            {
-              receptacle: action.receptacle,
-              receptacleType: action.receptacleType,
-              slot: action.slot,
-            }
-          ).then(() => {
+          var update = {
+            receptacle: action.receptacle,
+            receptacleType: action.receptacleType,
+            slot: action.slot,
+          }
+          if (action.receptacleType === 'dewar') {
+            update['lastDewar'] = action.receptacle
+          }
+          Puck.findOneAndUpdate({name: action.puck}, update).then(() => {
             socket.broadcast.emit('action', action)
           })
           break

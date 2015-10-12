@@ -5,6 +5,7 @@ const schema = new Schema({
   receptacleType: String,
   receptacle: String,
   slot: String,
+  lastDewar: String,
   note: String,
   owner: String,
 })
