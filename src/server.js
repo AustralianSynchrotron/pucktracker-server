@@ -84,6 +84,12 @@ export default function startServer(config) {
           })
           break
         }
+        case 'DELETE_DEWAR': {
+          Dewar.remove({name: action.dewar}).then(() => {
+            socket.broadcast.emit('action', action)
+          })
+          break
+        }
         case 'UPDATE_DEWAR': {
           Dewar.findOneAndUpdate(
             {name: action.dewar},
