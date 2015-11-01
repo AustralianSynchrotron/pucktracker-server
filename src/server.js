@@ -115,6 +115,12 @@ export default function startServer(config) {
           })
           break
         }
+        case 'DELETE_PUCK': {
+          Puck.remove({name: action.puck}).then(() => {
+            socket.broadcast.emit('action', action)
+          })
+          break
+        }
         case 'UPDATE_PUCK': {
           Puck.findOneAndUpdate(
             {name: action.puck},
