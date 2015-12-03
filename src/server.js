@@ -130,6 +130,16 @@ export default function startServer(config) {
           })
           break
         }
+        case 'CLEAR_PUCKS_FOR_RECEPTACLE': {
+          Puck.update(
+            {receptacle: action.receptacle, receptacleType: action.receptacleType},
+            {receptacle: null, receptacleType: null, slot: null},
+            {multi: true }
+          ).then(() => {
+            socket.broadcast.emit('action', action)
+          })
+          break
+        }
         case 'SET_DEWAR_OFFSITE': {
           Dewar.findOneAndUpdate(
             {name: action.dewar},
@@ -143,6 +153,7 @@ export default function startServer(config) {
           }).then(() => {
             socket.broadcast.emit('action', action)
           })
+          break
         }
       }
     })
