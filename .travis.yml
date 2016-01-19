@@ -4,3 +4,5 @@ node_js:
 sudo: false
 services:
   - mongodb
+before_install:
+  - cp config.example.js config.js
