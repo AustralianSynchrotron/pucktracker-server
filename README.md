@@ -1,7 +1,8 @@
 Puck tracker server.
 
-## Installation
+[![Build Status](https://travis-ci.org/AustralianSynchrotron/pucktracker-server.svg?branch=master)](https://travis-ci.org/AustralianSynchrotron/pucktracker-server)
 
+## Installation
 
 ### CentOS 7
 

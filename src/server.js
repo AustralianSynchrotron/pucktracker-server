@@ -1,5 +1,6 @@
 import Server from 'socket.io'
 import mongoose from 'mongoose'
+import { handleAction } from './controller'
 import Adaptor from './models/Adaptor'
 import Dewar from './models/Dewar'
 import Puck from './models/Puck'
@@ -35,127 +36,7 @@ export default function startServer(config) {
     socket.on('action', action => {
       if (!action) { return }
       action['broadcast'] = false
-      switch (action.type) {
-        case 'SET_ADAPTOR_PLACE': {
-          Adaptor.findOneAndUpdate(
-            {name: action.adaptor},
-            {location: action.location, position: action.position}
-          ).then(() => {
-            socket.broadcast.emit('action', action)
-          })
-          break
-        }
-        case 'SET_PORT_STATE': {
-          Port.findOneAndUpdate(
-            {container: action.container, number: action.number},
-            {state: action.state}
-          ).then(() => {
-            socket.broadcast.emit('action', action)
-          })
-          break
-        }
-        case 'SET_MULTIPLE_PORT_STATES': {
-          Port.update(
-            {container: action.container, number: {$in: action.numbers}},
-            {state: action.state},
-            {multi: true }
-          ).then(() => {
-            socket.broadcast.emit('action', action)
-          })
-          break
-        }
-        case 'SET_PUCK_RECEPTACLE': {
-          var update = {
-            receptacle: action.receptacle,
-            receptacleType: action.receptacleType,
-            slot: action.slot,
-          }
-          if (action.receptacleType === 'dewar') {
-            update['lastDewar'] = action.receptacle
-          }
-          Puck.findOneAndUpdate({name: action.puck}, update).then(() => {
-            socket.broadcast.emit('action', action)
-          })
-          break
-        }
-        case 'ADD_DEWAR': {
-          Dewar.create(action.dewar).then(() => {
-            socket.broadcast.emit('action', action)
-          })
-          break
-        }
-        case 'DELETE_DEWAR': {
-          Dewar.remove({name: action.dewar}).then(() => {
-            socket.broadcast.emit('action', action)
-          })
-          break
-        }
-        case 'UPDATE_DEWAR': {
-          Dewar.findOneAndUpdate(
-            {name: action.dewar},
-            action.update
-          ).then(() => {
-            socket.broadcast.emit('action', action)
-          })
-          break
-        }
-        case 'ADD_PUCK': {
-          Puck.create(action.puck).then(() => {
-            let ports = []
-            for (let number = 1; number <= 16; number += 1) {
-              ports.push({
-                containerType: 'puck',
-                container: action.puck.name,
-                number,
-              })
-            }
-            return Port.create(ports)
-          }).then(() => {
-            socket.broadcast.emit('action', action)
-          })
-          break
-        }
-        case 'DELETE_PUCK': {
-          Puck.remove({name: action.puck}).then(() => {
-            socket.broadcast.emit('action', action)
-          })
-          break
-        }
-        case 'UPDATE_PUCK': {
-          Puck.findOneAndUpdate(
-            {name: action.puck},
-            action.update
-          ).then(() => {
-            socket.broadcast.emit('action', action)
-          })
-          break
-        }
-        case 'CLEAR_PUCKS_FOR_RECEPTACLE': {
-          Puck.update(
-            {receptacle: action.receptacle, receptacleType: action.receptacleType},
-            {receptacle: null, receptacleType: null, slot: null},
-            {multi: true }
-          ).then(() => {
-            socket.broadcast.emit('action', action)
-          })
-          break
-        }
-        case 'SET_DEWAR_OFFSITE': {
-          Dewar.findOneAndUpdate(
-            {name: action.dewar},
-            {onsite: false}
-          ).then(() => {
-            return Puck.update(
-              {receptacle: action.dewar, receptacleType: 'dewar'},
-              {receptacle: null, receptacleType: null, slot: null},
-              {multi: true }
-            )
-          }).then(() => {
-            socket.broadcast.emit('action', action)
-          })
-          break
-        }
-      }
+      handleAction(action).then(() => socket.broadcast.emit('action', action))
     })
 
   })
