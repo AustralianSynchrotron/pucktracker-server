@@ -4,6 +4,7 @@ import { handleAction } from '../src/controller'
 import config from '../config'
 import Dewar from '../src/models/Dewar'
 
+mongoose.Promise = Promise
 mongoose.connect(config.testing.db)
 
 beforeEach(next => {
@@ -23,9 +24,8 @@ describe('controller', () => {
       () => Dewar.findOne((err, dewar) => {
         expect(dewar.name).to.equal('1001')
         next()
-      }),
-      next
-    )
+      })
+    ).catch(next)
   })
 
 })

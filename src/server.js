@@ -6,6 +6,8 @@ import Dewar from './models/Dewar'
 import Puck from './models/Puck'
 import Port from './models/Port'
 
+mongoose.Promise = Promise
+
 export default function startServer(config) {
 
   mongoose.connect(config.db)
