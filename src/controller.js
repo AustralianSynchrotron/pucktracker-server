@@ -5,6 +5,30 @@ import Port from './models/Port'
 
 export function handleAction(action) {
   switch (action.type) {
+    case 'ADD_DEWAR': {
+      return Dewar.create(action.dewar)
+    }
+    case 'DELETE_DEWAR': {
+      return Dewar.remove({name: action.dewar})
+    }
+    case 'UPDATE_DEWAR': {
+      return Dewar.findOneAndUpdate(
+        {name: action.dewar},
+        action.update
+      )
+    }
+    case 'SET_DEWAR_OFFSITE': {
+      return Dewar.findOneAndUpdate(
+        {name: action.dewar},
+        {onsite: false}
+      ).then(() => {
+        return Puck.update(
+          {receptacle: action.dewar, receptacleType: 'dewar'},
+          {receptacle: null, receptacleType: null, slot: null},
+          {multi: true }
+        )
+      })
+    }
     case 'SET_ADAPTOR_PLACE': {
       return Adaptor.findOneAndUpdate(
         {name: action.adaptor},
@@ -35,18 +59,6 @@ export function handleAction(action) {
       }
       return Puck.findOneAndUpdate({name: action.puck}, update)
     }
-    case 'ADD_DEWAR': {
-      return Dewar.create(action.dewar)
-    }
-    case 'DELETE_DEWAR': {
-      return Dewar.remove({name: action.dewar})
-    }
-    case 'UPDATE_DEWAR': {
-      return Dewar.findOneAndUpdate(
-        {name: action.dewar},
-        action.update
-      )
-    }
     case 'ADD_PUCK': {
       return Puck.create(action.puck).then(() => {
         let ports = []
@@ -75,18 +87,6 @@ export function handleAction(action) {
         {receptacle: null, receptacleType: null, slot: null},
         {multi: true }
       )
-    }
-    case 'SET_DEWAR_OFFSITE': {
-      return Dewar.findOneAndUpdate(
-        {name: action.dewar},
-        {onsite: false}
-      ).then(() => {
-        return Puck.update(
-          {receptacle: action.dewar, receptacleType: 'dewar'},
-          {receptacle: null, receptacleType: null, slot: null},
-          {multi: true }
-        )
-      })
     }
   }
 }
