@@ -11,9 +11,30 @@ mongoose.Promise = Promise
 export default function startServer(config) {
 
   mongoose.connect(config.db)
-
   const io = new Server().attach(config.port)
+  let dbConnected = false
+
+  function emitDatabaseState () {
+    const action = {
+      type: 'SET_DATABASE_CONNECTED',
+      connected: dbConnected
+    }
+    io.emit('action', action)
+  }
+
+  mongoose.connection.on('connected', () => {
+    dbConnected = true
+    emitDatabaseState()
+  })
+
+  mongoose.connection.on('disconnected', () => {
+    dbConnected = false
+    emitDatabaseState()
+  })
+
   io.on('connection', socket => {
+
+    emitDatabaseState()
 
     Adaptor.find().sort({name: 1}).then(adaptors => {
       const action = {type: 'SET_ADAPTORS', adaptors, broadcast: false}
