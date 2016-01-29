@@ -101,4 +101,48 @@ describe('controller', () => {
     })
   })
 
+  it('adds pucks', done => {
+    const action = {
+      type: 'ADD_PUCK',
+      puck: {name: 'ASP001'},
+    }
+    handleAction(action).then(() => {
+      Puck.findOne((err, puck) => {
+        expect(puck.name).to.equal('ASP001')
+        done()
+      })
+    })
+  })
+
+  it('deletes pucks', done => {
+    Puck.create({name: 'ASP001'}).then(() => {
+      const action = {
+        type: 'DELETE_PUCK',
+        puck: 'ASP001',
+      }
+      handleAction(action).then(() => {
+        Puck.findOne((err, puck) => {
+          expect(puck).to.equal(null)
+          done()
+        })
+      })
+    })
+  })
+
+  it('updates pucks', done => {
+    Puck.create({name: 'ASP001'}).then(() => {
+      const action = {
+        type: 'UPDATE_PUCK',
+        puck: 'ASP001',
+        update: {note: 'Test'},
+      }
+      handleAction(action).then(() => {
+        Puck.findOne((err, puck) => {
+          expect(puck.note).to.equal('Test')
+          done()
+        })
+      })
+    })
+  })
+
 })

@@ -35,30 +35,6 @@ export function handleAction(action) {
         {location: action.location, position: action.position}
       )
     }
-    case 'SET_PORT_STATE': {
-      return Port.findOneAndUpdate(
-        {container: action.container, number: action.number},
-        {state: action.state}
-      )
-    }
-    case 'SET_MULTIPLE_PORT_STATES': {
-      return Port.update(
-        {container: action.container, number: {$in: action.numbers}},
-        {state: action.state},
-        {multi: true }
-      )
-    }
-    case 'SET_PUCK_RECEPTACLE': {
-      var update = {
-        receptacle: action.receptacle,
-        receptacleType: action.receptacleType,
-        slot: action.slot,
-      }
-      if (action.receptacleType === 'dewar') {
-        update['lastDewar'] = action.receptacle
-      }
-      return Puck.findOneAndUpdate({name: action.puck}, update)
-    }
     case 'ADD_PUCK': {
       return Puck.create(action.puck).then(() => {
         let ports = []
@@ -81,10 +57,34 @@ export function handleAction(action) {
         action.update
       )
     }
+    case 'SET_PUCK_RECEPTACLE': {
+      var update = {
+        receptacle: action.receptacle,
+        receptacleType: action.receptacleType,
+        slot: action.slot,
+      }
+      if (action.receptacleType === 'dewar') {
+        update['lastDewar'] = action.receptacle
+      }
+      return Puck.findOneAndUpdate({name: action.puck}, update)
+    }
     case 'CLEAR_PUCKS_FOR_RECEPTACLE': {
       return Puck.update(
         {receptacle: action.receptacle, receptacleType: action.receptacleType},
         {receptacle: null, receptacleType: null, slot: null},
+        {multi: true }
+      )
+    }
+    case 'SET_PORT_STATE': {
+      return Port.findOneAndUpdate(
+        {container: action.container, number: action.number},
+        {state: action.state}
+      )
+    }
+    case 'SET_MULTIPLE_PORT_STATES': {
+      return Port.update(
+        {container: action.container, number: {$in: action.numbers}},
+        {state: action.state},
         {multi: true }
       )
     }
