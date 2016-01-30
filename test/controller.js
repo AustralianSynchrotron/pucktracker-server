@@ -5,6 +5,7 @@ import config from '../config'
 import Dewar from '../src/models/Dewar'
 import Adaptor from '../src/models/Adaptor'
 import Puck from '../src/models/Puck'
+import Port from '../src/models/Port'
 
 mongoose.Promise = Promise
 mongoose.connect(config.testing.db)
@@ -14,6 +15,7 @@ beforeEach(done => {
     Dewar.remove(),
     Adaptor.remove(),
     Puck.remove(),
+    Port.remove(),
   ]).then(() => done())
 })
 
@@ -107,11 +109,20 @@ describe('controller', () => {
       puck: {name: 'ASP001'},
     }
     handleAction(action).then(() => {
-      Puck.findOne((err, puck) => {
+      return Puck.findOne((err, puck) => {
         expect(puck.name).to.equal('ASP001')
-        done()
       })
-    })
+    }).then(() => {
+      return Port.find().sort('number').exec((err, ports) => {
+        expect(ports).to.have.length(16)
+        const firstPort = ports[0]
+        const lastPort = ports[15]
+        expect(firstPort.containerType).to.equal('puck')
+        expect(firstPort.container).to.equal('ASP001')
+        expect(firstPort.number).to.equal(1)
+        expect(lastPort.number).to.equal(16)
+      })
+    }).then(() => done())
   })
 
   it('deletes pucks', done => {
@@ -139,6 +150,87 @@ describe('controller', () => {
       handleAction(action).then(() => {
         Puck.findOne((err, puck) => {
           expect(puck.note).to.equal('Test')
+          done()
+        })
+      })
+    })
+  })
+
+  it('sets puck receptacles', done => {
+    Puck.create({name: 'ASP001', lastDewar: '1001'}).then(() => {
+      const action = {
+        type: 'SET_PUCK_RECEPTACLE',
+        puck: 'ASP001',
+        receptacleType: 'adaptor',
+        receptacle: 'AS-01',
+        slot: 'A',
+      }
+      handleAction(action).then(() => {
+        Puck.findOne((err, puck) => {
+          expect(puck.receptacleType).to.equal('adaptor')
+          expect(puck.receptacle).to.equal('AS-01')
+          expect(puck.slot).to.equal('A')
+          expect(puck.lastDewar).to.equal('1001')
+          done()
+        })
+      })
+    })
+  })
+
+  it('sets the last dewar when putting a puck in a dewar', done => {
+    Puck.create({name: 'ASP001', lastDewar: '1001'}).then(() => {
+      const action = {
+        type: 'SET_PUCK_RECEPTACLE',
+        puck: 'ASP001',
+        receptacleType: 'dewar',
+        receptacle: '1002',
+      }
+      handleAction(action).then(() => {
+        Puck.findOne((err, puck) => {
+          expect(puck.receptacleType).to.equal('dewar')
+          expect(puck.receptacle).to.equal('1002')
+          expect(puck.lastDewar).to.equal('1002')
+          done()
+        })
+      })
+    })
+  })
+
+  it('sets port states', done => {
+    Port.create({container: 'ASP001', number: 1}).then(() => {
+      const action = {
+        type: 'SET_PORT_STATE',
+        container: 'ASP001',
+        number: 1,
+        state: 'full',
+      }
+      handleAction(action).then(() => {
+        Port.findOne((err, port) => {
+          expect(port.state).to.equal('full')
+          done()
+        })
+      })
+    })
+  })
+
+  it('sets multiple port states', done => {
+    const ports = [
+      {container: 'ASP001', number: 1, state: 'unknown'},
+      {container: 'ASP001', number: 2, state: 'unknown'},
+      {container: 'ASP001', number: 3, state: 'unknown'},
+    ]
+    Port.create(ports).then(() => {
+      const action = {
+        type: 'SET_MULTIPLE_PORT_STATES',
+        container: 'ASP001',
+        numbers: [1, 3],
+        state: 'full',
+      }
+      handleAction(action).then(() => {
+        Port.find().sort('number').exec((err, ports) => {
+          expect(ports[0].state).to.equal('full')
+          expect(ports[1].state).to.equal('unknown')
+          expect(ports[2].state).to.equal('full')
           done()
         })
       })
