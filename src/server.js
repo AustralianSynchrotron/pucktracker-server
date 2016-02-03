@@ -4,7 +4,7 @@ import bodyParser from 'body-parser'
 import mongoose from 'mongoose'
 import { handleAction } from './controller'
 import Adaptor from './models/Adaptor'
-import Dewar from './models/Dewar'
+import Dewar, { nextNameForEpn } from './models/Dewar'
 import Puck from './models/Puck'
 import Port from './models/Port'
 
@@ -62,11 +62,26 @@ export default function startServer(config) {
   httpServer.use(bodyParser.json())
 
   httpServer.post('/dewars/new', (req, res) => {
-    Dewar.create(req.body).then(dewar => {
-      io.emit('action', {type: 'ADD_DEWAR', dewar: dewar})
-      res.json({error: null, data: dewar})
+    const { body: data } = req
+    if (!data.epn) {
+      return res.status(400).json({error: 'Missing field: epn'})
+    }
+    nextNameForEpn(data.epn, name => {
+      data.name = name
+      Dewar.create(data).then(dewar => {
+        io.emit('action', {type: 'ADD_DEWAR', dewar: dewar})
+        res.json({data: dewar})
+      }).catch(err => {
+        res.status(409).json({error: err.message})
+      })
+    })
+  })
+
+  httpServer.get('/dewars/:id', (req, res) => {
+    Dewar.findById(req.params.id).then(dewar => {
+      res.json({data: dewar})
     }).catch(err => {
-      res.status().json({error: err.message})
+      res.status(404).json({error: err.message})
     })
   })
 
