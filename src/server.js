@@ -1,4 +1,6 @@
 import Server from 'socket.io'
+import express from 'express'
+import bodyParser from 'body-parser'
 import mongoose from 'mongoose'
 import { handleAction } from './controller'
 import Adaptor from './models/Adaptor'
@@ -11,26 +13,18 @@ mongoose.Promise = Promise
 export default function startServer(config) {
 
   mongoose.connect(config.db)
-  const io = new Server().attach(config.port)
-  let dbConnected = false
+  const io = new Server().attach(config.wsPort)
 
   function emitDatabaseState () {
     const action = {
       type: 'SET_DATABASE_CONNECTED',
-      connected: dbConnected
+      connected: mongoose.connection.readyState === 1,
     }
     io.emit('action', action)
   }
 
-  mongoose.connection.on('connected', () => {
-    dbConnected = true
-    emitDatabaseState()
-  })
-
-  mongoose.connection.on('disconnected', () => {
-    dbConnected = false
-    emitDatabaseState()
-  })
+  mongoose.connection.on('connected', emitDatabaseState)
+  mongoose.connection.on('disconnected', emitDatabaseState)
 
   io.on('connection', socket => {
 
@@ -62,6 +56,22 @@ export default function startServer(config) {
       handleAction(action).then(() => socket.broadcast.emit('action', action))
     })
 
+  })
+
+  let httpServer = express()
+  httpServer.use(bodyParser.json())
+
+  httpServer.post('/dewars/new', (req, res) => {
+    Dewar.create(req.body).then(dewar => {
+      io.emit('action', {type: 'ADD_DEWAR', dewar: dewar})
+      res.json({error: null, data: dewar})
+    }).catch(err => {
+      res.status().json({error: err.message})
+    })
+  })
+
+  return httpServer.listen(config.httpPort, () => {
+    console.log(`Listening on ${config.httpPort}`)
   })
 
 }

@@ -1,14 +1,17 @@
 export default {
   testing: {
-    port: 8092,
+    httpPort: 8002,
+    wsPort: 8102,
     db: 'mongodb://localhost/pucktracker_testing',
   },
   development: {
-    port: 8090,
+    httpPort: 8000,
+    wsPort: 8100,
     db: 'mongodb://localhost/pucktracker_dev',
   },
   production: {
-    port: 8091,
+    httpPort: 8001,
+    wsPort: 8101,
     db: 'mongodb://localhost/pucktracker',
   },
 }

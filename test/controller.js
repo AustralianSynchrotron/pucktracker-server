@@ -8,18 +8,25 @@ import Puck from '../src/models/Puck'
 import Port from '../src/models/Port'
 
 mongoose.Promise = Promise
-mongoose.connect(config.testing.db)
-
-beforeEach(done => {
-  Promise.all([
-    Dewar.remove(),
-    Adaptor.remove(),
-    Puck.remove(),
-    Port.remove(),
-  ]).then(() => done())
-})
 
 describe('controller', () => {
+
+  before(() => {
+    mongoose.connect(config.testing.db)
+  })
+
+  after(() => {
+    mongoose.disconnect()
+  })
+
+  beforeEach(done => {
+    Promise.all([
+      Dewar.remove(),
+      Adaptor.remove(),
+      Puck.remove(),
+      Port.remove(),
+    ]).then(() => done())
+  })
 
   it('adds dewars', done => {
     const action = { type: 'ADD_DEWAR', dewar: { name: '1001' } }
