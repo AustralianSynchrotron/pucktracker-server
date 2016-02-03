@@ -1,10 +1,10 @@
 import mongoose from 'mongoose'
-import Adaptor from './src/models/Adaptor'
-import Dewar from './src/models/Dewar'
-import Puck from './src/models/Puck'
-import Port from './src/models/Port'
+import Adaptor from '../src/models/Adaptor'
+import Dewar from '../src/models/Dewar'
+import Puck from '../src/models/Puck'
+import Port from '../src/models/Port'
+import config from '../config'
 import pucks from './pucks'
-import config from './config'
 
 const env = process.env.NODE_ENV || 'development'
 

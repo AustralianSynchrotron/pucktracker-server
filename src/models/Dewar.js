@@ -9,6 +9,17 @@ const schema = new Schema({
   containerType: String,
   expectedContainers: String,
   onsite: Boolean,
+  department: String,
+  streetAddress: String,
+  city: String,
+  state: String,
+  postcode: String,
+  country: String,
+  phone: String,
+  email: String,
+  returnDewar: Boolean,
+  courier: String,
+  courierAccount: String,
 })
 
 const Dewar = mongoose.model('Dewar', schema)
