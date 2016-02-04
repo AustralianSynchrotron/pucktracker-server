@@ -26,7 +26,7 @@ describe('http server', () => {
     ]).then(() => done())
   })
 
-  describe('/dewars/new', () => {
+  describe('POST /dewars/new', () => {
 
     it('requires an epn', done => {
       request
@@ -68,7 +68,7 @@ describe('http server', () => {
 
   })
 
-  describe('/dewars/<dewar_id>', () => {
+  describe('GET /dewars/<dewar_id>', () => {
 
     it('returns dewars when id exists', done => {
       Dewar.create([
@@ -81,7 +81,7 @@ describe('http server', () => {
             expect(res.body.data.name).to.eql('first-dewar')
           })
           .expect(200, done)
-      }).catch(done)
+      })
     })
 
     it('response with a 404 for non-existant id', done => {
@@ -91,6 +91,41 @@ describe('http server', () => {
           expect(res.body.error).to.be.a('string')
         })
         .expect(404, done)
+    })
+
+  })
+
+
+  describe('POST /actions', () => {
+
+    it('moves dewars onsite', done => {
+      const action = {
+        type: 'UPDATE_DEWAR',
+        dewar: 'the-dewar',
+        update: {onsite: true},
+      }
+      Dewar.create({name: 'the-dewar'}).then(dewar => {
+        request
+          .post('/actions')
+          .send(action)
+          .expect(200)
+          .end(err => {
+            if (err) return done(err)
+            Dewar.findOne({name: 'the-dewar'}).then(dewar => {
+              expect(dewar.onsite).to.equal(true)
+              done()
+            }).catch(done)
+          })
+      })
+    })
+
+    it('handles empty body gracefully', done => {
+      request
+        .post('/actions')
+        .expect(res => {
+          expect(res.body.error).to.be.a('string')
+        })
+        .expect(400, done)
     })
 
   })

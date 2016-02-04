@@ -88,5 +88,8 @@ export function handleAction(action) {
         {multi: true }
       )
     }
+    default: {
+      return Promise.reject(new Error(`Unhandled action type: ${action.type}`))
+    }
   }
 }

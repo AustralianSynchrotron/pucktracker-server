@@ -85,6 +85,16 @@ export default function startServer(config) {
     })
   })
 
+  httpServer.post('/actions', (req, res) => {
+    const {body: action} = req
+    handleAction(action).then(() => {
+      io.emit('action', action)
+      res.status(200).json({data: 'ok'})
+    }).catch(err => {
+      res.status(400).json({error: err.message})
+    })
+  })
+
   return httpServer.listen(config.httpPort, () => {
     console.log(`Listening on ${config.httpPort}`)
   })
