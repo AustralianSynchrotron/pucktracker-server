@@ -77,8 +77,9 @@ export default function startServer(config) {
     })
   })
 
-  httpServer.get('/dewars/:id', (req, res) => {
-    Dewar.findById(req.params.id).then(dewar => {
+  httpServer.get('/dewars/:name', (req, res) => {
+    Dewar.findOne({name: req.params.name}).then(dewar => {
+      if (!dewar) throw Error('Not found')
       res.json({data: dewar})
     }).catch(err => {
       res.status(404).json({error: err.message})

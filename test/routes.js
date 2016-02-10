@@ -68,15 +68,15 @@ describe('http server', () => {
 
   })
 
-  describe('GET /dewars/<dewar_id>', () => {
+  describe('GET /dewars/<dewar_name>', () => {
 
-    it('returns dewars when id exists', done => {
+    it('returns dewars when name exists', done => {
       Dewar.create([
         {name: 'first-dewar'},
         {name: 'second-dewar'},
       ]).then(dewars => {
         request
-          .get('/dewars/' + dewars[0].id)
+          .get('/dewars/first-dewar')
           .expect(res => {
             expect(res.body.data.name).to.eql('first-dewar')
           })
@@ -84,9 +84,9 @@ describe('http server', () => {
       })
     })
 
-    it('response with a 404 for non-existant id', done => {
+    it('response with a 404 for non-existant dewar name', done => {
       request
-        .get('/dewars/an-id-that-does-not-exist')
+        .get('/dewars/an-dewar-that-does-not-exist')
         .expect(res => {
           expect(res.body.error).to.be.a('string')
         })

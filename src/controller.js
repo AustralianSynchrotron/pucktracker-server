@@ -88,6 +88,14 @@ export function handleAction(action) {
         {multi: true }
       )
     }
+    case 'REMOVE_ALL': {
+      return Promise.all([
+        Dewar.remove(),
+        Adaptor.remove(),
+        Puck.remove(),
+        Port.remove(),
+      ])
+    }
     default: {
       return Promise.reject(new Error(`Unhandled action type: ${action.type}`))
     }

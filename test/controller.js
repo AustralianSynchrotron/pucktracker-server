@@ -244,4 +244,29 @@ describe('controller', () => {
     })
   })
 
+  it('clears all data', done => {
+    const action = {type: 'REMOVE_ALL'}
+    Promise.all([
+      Dewar.create({name: 'd-123a-1'}),
+      Adaptor.create({name: 'AS-01'}),
+      Puck.create({name: 'ASP001'}),
+      Port.create({container: 'AS-01', number: 1})
+    ]).then(() => {
+      return handleAction(action)
+    }).then(() => {
+      return Promise.all([
+        Dewar.findOne(),
+        Adaptor.findOne(),
+        Puck.findOne(),
+        Port.findOne(),
+      ])
+    }).then(([dewar, adaptor, puck, port]) => {
+      expect(dewar).to.be.null
+      expect(adaptor).to.be.null
+      expect(puck).to.be.null
+      expect(port).to.be.null
+      done()
+    }).catch(done)
+  })
+
 })
