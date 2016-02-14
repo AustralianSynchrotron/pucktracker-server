@@ -1,6 +1,6 @@
 {
   "name": "pucktracker-server",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Puck tracker server",
   "main": "index.js",
   "scripts": {
@@ -33,6 +33,7 @@
     "babel-register": "6.5.2",
     "chai": "3.5.0",
     "mocha": "2.4.5",
+    "sinon": "1.17.3",
     "supertest": "1.2.0"
   }
 }

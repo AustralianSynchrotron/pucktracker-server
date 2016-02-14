@@ -20,6 +20,12 @@ const schema = new Schema({
   returnDewar: Boolean,
   courier: String,
   courierAccount: String,
+  addedTime: Date,
+  arrivedTime: Date,
+  departedTime: Date,
+  experimentStartTime: Date,
+  experimentEndTime: Date,
+  filledTime: Date,
 })
 
 const Dewar = mongoose.model('Dewar', schema)

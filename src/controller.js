@@ -29,6 +29,12 @@ export function handleAction(action) {
         )
       })
     }
+    case 'DEWAR_FILLED': {
+      return Dewar.findOneAndUpdate(
+        {name: action.dewar},
+        {filledTime: action.time || new Date()}
+      )
+    }
     case 'SET_ADAPTOR_PLACE': {
       return Adaptor.findOneAndUpdate(
         {name: action.adaptor},

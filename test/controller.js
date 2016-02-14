@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import sinon from 'sinon'
 import mongoose from 'mongoose'
 import { handleAction } from '../src/controller'
 import config from '../config'
@@ -11,11 +12,16 @@ mongoose.Promise = Promise
 
 describe('controller', () => {
 
+  let clock
+  const TIME = new Date(2016, 0, 2, 3, 4, 5)
+
   before(() => {
     mongoose.connect(config.testing.db)
+    clock = sinon.useFakeTimers(TIME.getTime())
   })
 
   after(() => {
+    clock.restore()
     mongoose.disconnect()
   })
 
@@ -267,6 +273,38 @@ describe('controller', () => {
       expect(port).to.be.null
       done()
     }).catch(done)
+  })
+
+  it('sets dewar filled time when time is given', done => {
+    const time = new Date(2016, 0, 10, 11, 12, 13)
+    const action = {
+      type: 'DEWAR_FILLED',
+      dewar: 'd-123a-1',
+      time,
+    }
+    Dewar.create({name: 'd-123a-1'})
+      .then(() => handleAction(action))
+      .then(() => Dewar.findOne())
+      .then(dewar => {
+        expect(dewar.filledTime).to.eql(time)
+        done()
+      })
+      .catch(done)
+  })
+
+  it('sets dewar filled time when time is not given', done => {
+    const action = {
+      type: 'DEWAR_FILLED',
+      dewar: 'd-123a-1',
+    }
+    Dewar.create({name: 'd-123a-1'})
+      .then(() => handleAction(action))
+      .then(() => Dewar.findOne())
+      .then(dewar => {
+        expect(dewar.filledTime).to.eql(TIME)
+        done()
+      })
+      .catch(done)
   })
 
 })
