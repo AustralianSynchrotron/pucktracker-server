@@ -6,21 +6,26 @@ import Port from './models/Port'
 export function handleAction(action) {
   switch (action.type) {
     case 'ADD_DEWAR': {
+      if (!action.dewar.addedTime) { action.dewar.addedTime = new Date() }
       return Dewar.create(action.dewar)
     }
     case 'DELETE_DEWAR': {
       return Dewar.remove({name: action.dewar})
     }
     case 'UPDATE_DEWAR': {
+      if (action.update.onsite && !action.update.arrivedTime) {
+        action.update.arrivedTime = new Date()
+      }
       return Dewar.findOneAndUpdate(
         {name: action.dewar},
         action.update
       )
     }
     case 'SET_DEWAR_OFFSITE': {
+      if (!action.time) { action.time = new Date() }
       return Dewar.findOneAndUpdate(
         {name: action.dewar},
-        {onsite: false}
+        {onsite: false, departedTime: action.time}
       ).then(() => {
         return Puck.update(
           {receptacle: action.dewar, receptacleType: 'dewar'},

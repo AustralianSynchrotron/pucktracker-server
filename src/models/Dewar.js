@@ -26,6 +26,7 @@ const schema = new Schema({
   experimentStartTime: Date,
   experimentEndTime: Date,
   filledTime: Date,
+  missing: Boolean,
 })
 
 const Dewar = mongoose.model('Dewar', schema)

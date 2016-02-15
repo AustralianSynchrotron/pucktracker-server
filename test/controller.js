@@ -34,28 +34,44 @@ describe('controller', () => {
     ]).then(() => done())
   })
 
-  it('adds dewars', done => {
-    const action = { type: 'ADD_DEWAR', dewar: { name: '1001' } }
-    handleAction(action).then(
-      () => Dewar.findOne((err, dewar) => {
-        expect(dewar.name).to.equal('1001')
-        done()
-      })
-    ).catch(done)
-  })
+  describe('ADD_DEWAR', () => {
 
-  it('rejects duplicate dewars', done => {
-    Dewar.create({name: '1001'}).then(() => {
-      const action = { type: 'ADD_DEWAR', dewar: { name: '1001' } }
-      handleAction(action).then(() => done('expected error')).catch(err => done())
+    it('adds dewars', done => {
+      const addedTime = new Date(2013, 0, 1, 0, 0, 0)
+      const action = { type: 'ADD_DEWAR', dewar: { name: 'd-123a-1', addedTime } }
+      handleAction(action).then(
+        () => Dewar.findOne((err, dewar) => {
+          expect(dewar.name).to.equal('d-123a-1')
+          expect(dewar.addedTime).to.eql(addedTime)
+          done()
+        })
+      ).catch(done)
     })
+
+    it('sets addedTime to now if not given', done => {
+      const action = { type: 'ADD_DEWAR', dewar: { name: 'd-123a-1' } }
+      handleAction(action).then(
+        () => Dewar.findOne((err, dewar) => {
+          expect(dewar.addedTime).to.eql(TIME)
+          done()
+        })
+      ).catch(done)
+    })
+
+    it('rejects duplicate dewars', done => {
+      Dewar.create({name: 'd-123a-1'}).then(() => {
+        const action = { type: 'ADD_DEWAR', dewar: { name: 'd-123a-1' } }
+        handleAction(action).then(() => done('expected error')).catch(err => done())
+      })
+    })
+
   })
 
   it('deletes dewars', done => {
-    Dewar.create({name: '1001'}).then(() => {
-      const action = { type: 'DELETE_DEWAR', dewar: '1001' }
+    Dewar.create({name: 'd-123a-1'}).then(() => {
+      const action = { type: 'DELETE_DEWAR', dewar: 'd-123a-1' }
       handleAction(action).then(() => {
-        Dewar.findOne({name: '1001'}, (err, dewar) => {
+        Dewar.findOne({name: 'd-123a-1'}, (err, dewar) => {
           expect(dewar).to.equal(null)
           done()
         })
@@ -63,39 +79,82 @@ describe('controller', () => {
     })
   })
 
-  it('updates dewars', done => {
-    Dewar.create({name: '1001', epn: '123a'}).then(() => {
+  describe('UPDATE_DEWAR', () => {
+
+    it('updates dewars', done => {
       const action = {
         type: 'UPDATE_DEWAR',
-        dewar: '1001',
+        dewar: 'd-123a-1',
         update: {epn: '456b'},
       }
-      handleAction(action).then(() => {
-        Dewar.findOne({name: '1001'}, (err, dewar) => {
+      Dewar.create({name: 'd-123a-1', epn: '123a'})
+        .then(() => handleAction(action))
+        .then(() => Dewar.findOne())
+        .then(dewar => {
           expect(dewar.epn).to.equal('456b')
+          expect(dewar.arrivedTime).to.not.exist
           done()
         })
-      })
+        .catch(done)
     })
+
+    it('sets dewar arrival time', done => {
+      const action = {
+        type: 'UPDATE_DEWAR',
+        dewar: 'd-123a-1',
+        update: {onsite: true},
+      }
+      Dewar.create({name: 'd-123a-1', onsite: false})
+        .then(() => handleAction(action))
+        .then(() => Dewar.findOne())
+        .then(dewar => {
+          expect(dewar.onsite).to.equal(true)
+          expect(dewar.arrivedTime).to.eql(TIME)
+          done()
+        })
+        .catch(done)
+    })
+
   })
 
-  it('moves dewars offsite', done => {
-    Promise.all([
-      Dewar.create({name: '1001', onsite: true}),
-      Puck.create({name: 'ASP001', receptacleType: 'dewar', receptacle: '1001'}),
-    ]).then(() => {
-      const action = {type: 'SET_DEWAR_OFFSITE', dewar: '1001'}
-      handleAction(action).then(() => {
-        Dewar.findOne({name: '1001'}, (err, dewar) => {
-          expect(dewar.onsite).to.equal(false)
-          Puck.findOne({name: 'ASP001'}, (err, puck) => {
-            expect(puck.receptacleType).to.equal(null)
-            expect(puck.receptacle).to.equal(null)
-            done()
-          })
-        })
-      })
+  describe('SET_DEWAR_OFFSITE', () => {
+
+    it('moves dewars offsite', done => {
+      const time = new Date(2016, 0, 10, 11, 12, 13)
+      const action = {
+        type: 'SET_DEWAR_OFFSITE',
+        dewar: 'd-123a-1',
+        time,
+      }
+      Promise.all([
+        Dewar.create({name: 'd-123a-1', onsite: true}),
+        Puck.create({name: 'ASP001', receptacleType: 'dewar',
+                     receptacle: 'd-123a-1'}),
+      ]).then(
+        () => handleAction(action)
+      ).then(
+        () => Promise.all([ Dewar.findOne(), Puck.findOne() ])
+      ).then(([dewar, puck]) => {
+        expect(dewar.onsite).to.equal(false)
+        expect(dewar.departedTime).to.eql(time)
+        expect(puck.receptacleType).to.equal(null)
+        expect(puck.receptacle).to.equal(null)
+        done()
+      }).catch(done)
     })
+
+    it('sets departedTime to now if not given', done => {
+      const action = {type: 'SET_DEWAR_OFFSITE', dewar: 'd-123a-1'}
+      Dewar.create({name: 'd-123a-1', onsite: true})
+        .then(() => handleAction(action))
+        .then(() => Dewar.findOne())
+        .then(dewar => {
+          expect(dewar.departedTime).to.eql(TIME)
+          done()
+        })
+        .catch(done)
+    })
+
   })
 
   it('updates adaptor places', done => {
@@ -170,7 +229,7 @@ describe('controller', () => {
   })
 
   it('sets puck receptacles', done => {
-    Puck.create({name: 'ASP001', lastDewar: '1001'}).then(() => {
+    Puck.create({name: 'ASP001', lastDewar: 'd-123a-1'}).then(() => {
       const action = {
         type: 'SET_PUCK_RECEPTACLE',
         puck: 'ASP001',
@@ -183,7 +242,7 @@ describe('controller', () => {
           expect(puck.receptacleType).to.equal('adaptor')
           expect(puck.receptacle).to.equal('AS-01')
           expect(puck.slot).to.equal('A')
-          expect(puck.lastDewar).to.equal('1001')
+          expect(puck.lastDewar).to.equal('d-123a-1')
           done()
         })
       })
@@ -191,18 +250,18 @@ describe('controller', () => {
   })
 
   it('sets the last dewar when putting a puck in a dewar', done => {
-    Puck.create({name: 'ASP001', lastDewar: '1001'}).then(() => {
+    Puck.create({name: 'ASP001', lastDewar: 'd-123a-1'}).then(() => {
       const action = {
         type: 'SET_PUCK_RECEPTACLE',
         puck: 'ASP001',
         receptacleType: 'dewar',
-        receptacle: '1002',
+        receptacle: 'd-456b-1',
       }
       handleAction(action).then(() => {
         Puck.findOne((err, puck) => {
           expect(puck.receptacleType).to.equal('dewar')
-          expect(puck.receptacle).to.equal('1002')
-          expect(puck.lastDewar).to.equal('1002')
+          expect(puck.receptacle).to.equal('d-456b-1')
+          expect(puck.lastDewar).to.equal('d-456b-1')
           done()
         })
       })
@@ -257,16 +316,12 @@ describe('controller', () => {
       Adaptor.create({name: 'AS-01'}),
       Puck.create({name: 'ASP001'}),
       Port.create({container: 'AS-01', number: 1})
-    ]).then(() => {
-      return handleAction(action)
-    }).then(() => {
-      return Promise.all([
-        Dewar.findOne(),
-        Adaptor.findOne(),
-        Puck.findOne(),
-        Port.findOne(),
-      ])
-    }).then(([dewar, adaptor, puck, port]) => {
+    ]).then(
+      () => handleAction(action)
+    ).then(
+      () => Promise.all([Dewar.findOne(), Adaptor.findOne(),
+                         Puck.findOne(), Port.findOne()])
+    ).then(([dewar, adaptor, puck, port]) => {
       expect(dewar).to.be.null
       expect(adaptor).to.be.null
       expect(puck).to.be.null
@@ -275,36 +330,40 @@ describe('controller', () => {
     }).catch(done)
   })
 
-  it('sets dewar filled time when time is given', done => {
-    const time = new Date(2016, 0, 10, 11, 12, 13)
-    const action = {
-      type: 'DEWAR_FILLED',
-      dewar: 'd-123a-1',
-      time,
-    }
-    Dewar.create({name: 'd-123a-1'})
-      .then(() => handleAction(action))
-      .then(() => Dewar.findOne())
-      .then(dewar => {
-        expect(dewar.filledTime).to.eql(time)
-        done()
-      })
-      .catch(done)
-  })
+  describe('DEWAR_FILLED', () => {
 
-  it('sets dewar filled time when time is not given', done => {
-    const action = {
-      type: 'DEWAR_FILLED',
-      dewar: 'd-123a-1',
-    }
-    Dewar.create({name: 'd-123a-1'})
-      .then(() => handleAction(action))
-      .then(() => Dewar.findOne())
-      .then(dewar => {
-        expect(dewar.filledTime).to.eql(TIME)
-        done()
-      })
-      .catch(done)
+    it('sets dewar filled time when time is given', done => {
+      const time = new Date(2016, 0, 10, 11, 12, 13)
+      const action = {
+        type: 'DEWAR_FILLED',
+        dewar: 'd-123a-1',
+        time,
+      }
+      Dewar.create({name: 'd-123a-1'})
+        .then(() => handleAction(action))
+        .then(() => Dewar.findOne())
+        .then(dewar => {
+          expect(dewar.filledTime).to.eql(time)
+          done()
+        })
+        .catch(done)
+    })
+
+    it('sets dewar filled time when time is not given', done => {
+      const action = {
+        type: 'DEWAR_FILLED',
+        dewar: 'd-123a-1',
+      }
+      Dewar.create({name: 'd-123a-1'})
+        .then(() => handleAction(action))
+        .then(() => Dewar.findOne())
+        .then(dewar => {
+          expect(dewar.filledTime).to.eql(TIME)
+          done()
+        })
+        .catch(done)
+    })
+
   })
 
 })
