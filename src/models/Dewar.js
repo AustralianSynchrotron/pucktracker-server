@@ -29,6 +29,11 @@ const schema = new Schema({
   missing: Boolean,
 })
 
+schema.methods.expectedPucks = function (cb) {
+  const expectedPuckNames = parseExpectedContainers(this.expectedContainers)
+  return this.model('Puck').find({name: {$in: expectedPuckNames}}, cb)
+}
+
 const Dewar = mongoose.model('Dewar', schema)
 
 export default Dewar
@@ -45,4 +50,16 @@ export function nextNameForEpn (epn, callback) {
     }
     callback(`d-${epn}-${nextNumber}`)
   })
+}
+
+export function parseExpectedContainers (expectedContainers) {
+  if (!expectedContainers) { return [] }
+  const parsed = expectedContainers.split(' | ').map(rawStr => {
+    const result = /([0-9]+)\s*$/.exec(rawStr)
+    if (!result) { return null }
+    const numStr = result[1]
+    const paddedNumStr = ('0000' + numStr).substring(numStr.length)
+    return `ASP${paddedNumStr}`
+  })
+  return parsed.filter(c => !!c)
 }

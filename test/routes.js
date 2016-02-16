@@ -1,21 +1,27 @@
 import { expect } from 'chai'
+import sinon from 'sinon'
 import mongoose from 'mongoose'
 import supertest from 'supertest'
 import config from '../config'
 import startServer from '../src/server'
 import Dewar from '../src/models/Dewar'
+import Puck from '../src/models/Puck'
 
 describe('http server', () => {
 
   let server
   let request
+  let clock
+  const TIME = new Date(2016, 0, 2, 3, 4, 5)
 
   before(() => {
     server = startServer(config.testing)
     request = supertest(server)
+    clock = sinon.useFakeTimers(TIME.getTime())
   })
 
   after(() => {
+    clock.restore()
     server.close()
     mongoose.disconnect()
   })
@@ -23,6 +29,7 @@ describe('http server', () => {
   beforeEach(done => {
     Promise.all([
       Dewar.remove(),
+      Puck.remove(),
     ]).then(() => done())
   })
 
@@ -63,6 +70,44 @@ describe('http server', () => {
             expect(res.body.data.name).to.eql('d-1234a-3')
           })
           .expect(200, done)
+      })
+    })
+
+    it('sets the addedTime', done => {
+      request
+        .post('/dewars/new')
+        .send({epn: '1234a'})
+        .expect(200, () => {
+          Dewar.findOne().then(dewar => {
+            expect(dewar.addedTime).to.eql(TIME)
+            done()
+          }).catch(done)
+        })
+    })
+
+    it('sets receptacle for expected pucks', done => {
+      const requestBody = {
+        epn: '1234a',
+        containerType: 'pucks',
+        expectedContainers: '1 | asp02 | 3 | bad | | | | ',
+      }
+      Puck.create([
+        {name: 'ASP0001'},
+        {name: 'ASP0002'},
+        {name: 'ASP0003', receptacle: 'somewhere'},
+      ]).then(() => {
+        request
+          .post('/dewars/new')
+          .send(requestBody)
+          .expect(200, () => {
+            Puck.find().sort('name').then(([puck1, puck2, puck3]) => {
+              expect(puck1.receptacle).to.equal('d-1234a-1')
+              expect(puck1.receptacleType).to.equal('dewar')
+              expect(puck2.receptacle).to.equal('d-1234a-1')
+              expect(puck3.receptacle).to.equal('somewhere')
+              done()
+            }).catch(done)
+          })
       })
     })
 

@@ -63,14 +63,14 @@ export default function startServer(config) {
 
   httpServer.post('/dewars/new', (req, res) => {
     const { body: data } = req
-    if (!data.epn) {
-      return res.status(400).json({error: 'Missing field: epn'})
-    }
+    if (!data.epn) { return res.status(400).json({error: 'Missing field: epn'}) }
     nextNameForEpn(data.epn, name => {
       data.name = name
+      if (!data.addedTime) { data.addedTime = new Date() }
       Dewar.create(data).then(dewar => {
         io.emit('action', {type: 'ADD_DEWAR', dewar: dewar})
-        res.json({data: dewar})
+        if (dewar.containerType != 'pucks') { return res.json({data: dewar}) }
+        setExpectedPucksInDewar(dewar).then(() => { res.json({data: dewar}) })
       }).catch(err => {
         res.status(409).json({error: err.message})
       })
@@ -95,6 +95,21 @@ export default function startServer(config) {
       res.status(400).json({error: err.message})
     })
   })
+
+  function setExpectedPucksInDewar (dewar) {
+    return dewar.expectedPucks().then(pucks => {
+      return Promise.all(pucks.filter(puck => !puck.receptacle).map(puck => {
+        const action = {
+          type: 'SET_PUCK_RECEPTACLE',
+          puck: puck.name,
+          receptacle: dewar.name,
+          receptacleType: 'dewar',
+        }
+        io.emit('action', action)
+        return handleAction(action)
+      }))
+    })
+  }
 
   return httpServer.listen(config.httpPort, () => {
     console.log(`Listening on ${config.httpPort}`)

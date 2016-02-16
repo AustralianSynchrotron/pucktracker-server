@@ -1,7 +1,10 @@
 import { expect } from 'chai'
 import mongoose from 'mongoose'
 import config from '../../config'
-import Dewar, { nextNameForEpn } from '../../src/models/Dewar'
+import Dewar, {
+  nextNameForEpn, parseExpectedContainers
+} from '../../src/models/Dewar'
+import Puck from '../../src/models/Puck'
 
 mongoose.Promise = Promise
 
@@ -18,6 +21,7 @@ describe('Dewar', () => {
   beforeEach(done => {
     Promise.all([
       Dewar.remove(),
+      Puck.remove(),
     ]).then(() => done())
   })
 
@@ -39,6 +43,46 @@ describe('Dewar', () => {
       })
     })
 
+  })
+
+  describe('parseExpectedContainers', () => {
+    it('parses simple numbers', () => {
+      expect(parseExpectedContainers('1 | 2')).to.eql(['ASP0001', 'ASP0002'])
+    })
+    it('ignores leading and trailing spaces', () => {
+      expect(parseExpectedContainers('   1     ')).to.eql(['ASP0001'])
+    })
+    it('ignores empty slots', () => {
+      const parsed = parseExpectedContainers('1 |  | 2 | ')
+      expect(parsed).to.eql(['ASP0001', 'ASP0002'])
+    })
+    it('parses numbers with leading letters', () => {
+      const parsed = parseExpectedContainers('aspo1 | AS02')
+      expect(parsed).to.eql(['ASP0001', 'ASP0002'])
+    })
+  })
+
+
+  describe('expectedPucks', () => {
+    it('finds pucks that match expected containers', done => {
+      Puck.create([{name: 'ASP0001'}, {name: 'ASP0002'}, {name: 'ASP0003'}])
+        .then(() => Dewar.create({name: 'd-123a-1', expectedContainers: '1 | 2'}))
+        .then(dewar => dewar.expectedPucks())
+        .then(expectedPucks => {
+          expect(expectedPucks).to.have.length(2)
+          const names = expectedPucks.map(puck => puck.name).sort()
+          expect(names).to.eql(['ASP0001', 'ASP0002'])
+          done()
+        }).catch(done)
+    })
+    it('returns an empty list if expectedContainers is undefined', done => {
+      Dewar.create({name: 'd-123a-1'})
+        .then(dewar => dewar.expectedPucks())
+        .then(expectedPucks => {
+          expect(expectedPucks).to.have.length(0)
+          done()
+        }).catch(done)
+    })
   })
 
 })

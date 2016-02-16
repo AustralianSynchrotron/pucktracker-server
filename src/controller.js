@@ -69,7 +69,7 @@ export function handleAction(action) {
       )
     }
     case 'SET_PUCK_RECEPTACLE': {
-      var update = {
+      let update = {
         receptacle: action.receptacle,
         receptacleType: action.receptacleType,
         slot: action.slot,
