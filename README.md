@@ -11,7 +11,7 @@ Requirements:
 * [nvm](https://github.com/creationix/nvm)
 
 ```
-nvm install 0.12
+nvm install 4
 yum -y groupinstall 'Development Tools
 sudo yum install krb5-devel
 npm install

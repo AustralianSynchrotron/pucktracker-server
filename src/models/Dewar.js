@@ -3,6 +3,7 @@ import mongoose, { Schema } from 'mongoose'
 const schema = new Schema({
   name: {type: String, index: {unique: true}},
   epn: String,
+  beamline: String,
   owner: String,
   institute: String,
   note: String,
@@ -17,6 +18,7 @@ const schema = new Schema({
   country: String,
   phone: String,
   email: String,
+  piEmail: String,
   returnDewar: Boolean,
   courier: String,
   courierAccount: String,

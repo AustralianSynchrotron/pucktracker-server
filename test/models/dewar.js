@@ -85,4 +85,16 @@ describe('Dewar', () => {
     })
   })
 
+  it('stores piEmail', done => {
+    Dewar.create({name: 'd-123a-1', piEmail: 'jane@example.com'})
+      .then(dewar => { expect(dewar.piEmail).to.equal('jane@example.com'); done() })
+      .catch(done)
+  })
+
+  it('stores the beamline', done => {
+    Dewar.create({name: 'd-123a-1', beamline: 'MX1'})
+      .then(dewar => { expect(dewar.beamline).to.equal('MX1'); done() })
+      .catch(done)
+  })
+
 })
