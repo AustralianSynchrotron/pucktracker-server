@@ -67,16 +67,37 @@ describe('controller', () => {
 
   })
 
-  it('deletes dewars', done => {
-    Dewar.create({name: 'd-123a-1'}).then(() => {
-      const action = { type: 'DELETE_DEWAR', dewar: 'd-123a-1' }
-      handleAction(action).then(() => {
-        Dewar.findOne({name: 'd-123a-1'}, (err, dewar) => {
-          expect(dewar).to.equal(null)
-          done()
+  describe('DELETE_DEWAR', () => {
+
+    it('deletes dewars', done => {
+      Dewar.create({name: 'd-123a-1'}).then(() => {
+        const action = { type: 'DELETE_DEWAR', dewar: 'd-123a-1' }
+        handleAction(action).then(() => {
+          Dewar.findOne({name: 'd-123a-1'}, (err, dewar) => {
+            expect(dewar).to.equal(null)
+            done()
+          })
         })
       })
     })
+
+    it('clears pucks from deleted dewar', done => {
+      const action = { type: 'DELETE_DEWAR', dewar: 'd-123a-1' }
+      Promise.all([
+        Dewar.create({name: 'd-123a-1'}),
+        Puck.create({name: 'ASP001', receptacleType: 'dewar',
+                     receptacle: 'd-123a-1'}),
+      ]).then(
+        () => handleAction(action)
+      ).then(
+        () => Puck.findOne()
+      ).then(puck => {
+        expect(puck.receptacleType).to.equal(null)
+        expect(puck.receptacle).to.equal(null)
+        done()
+      }).catch(done)
+    })
+
   })
 
   describe('UPDATE_DEWAR', () => {

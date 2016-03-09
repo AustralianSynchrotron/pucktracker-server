@@ -10,7 +10,11 @@ export function handleAction(action) {
       return Dewar.create(action.dewar)
     }
     case 'DELETE_DEWAR': {
-      return Dewar.remove({name: action.dewar})
+      return Dewar.remove({name: action.dewar}).then(
+        () => Puck.update({receptacle: action.dewar, receptacleType: 'dewar'},
+                          {receptacle: null, receptacleType: null, slot: null},
+                          {multi: true })
+      )
     }
     case 'UPDATE_DEWAR': {
       if (action.update.onsite && !action.update.arrivedTime) {
