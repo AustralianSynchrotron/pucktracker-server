@@ -13,7 +13,7 @@ export function handleAction(action) {
       return Dewar.remove({name: action.dewar}).then(
         () => Puck.update({receptacle: action.dewar, receptacleType: 'dewar'},
                           {receptacle: null, receptacleType: null, slot: null},
-                          {multi: true })
+                          {multi: true})
       )
     }
     case 'UPDATE_DEWAR': {
@@ -34,7 +34,7 @@ export function handleAction(action) {
         return Puck.update(
           {receptacle: action.dewar, receptacleType: 'dewar'},
           {receptacle: null, receptacleType: null, slot: null},
-          {multi: true }
+          {multi: true}
         )
       })
     }
@@ -87,7 +87,7 @@ export function handleAction(action) {
       return Puck.update(
         {receptacle: action.receptacle, receptacleType: action.receptacleType},
         {receptacle: null, receptacleType: null, slot: null},
-        {multi: true }
+        {multi: true}
       )
     }
     case 'SET_PORT_STATE': {
@@ -100,7 +100,7 @@ export function handleAction(action) {
       return Port.update(
         {container: action.container, number: {$in: action.numbers}},
         {state: action.state},
-        {multi: true }
+        {multi: true}
       )
     }
     case 'REMOVE_ALL': {
