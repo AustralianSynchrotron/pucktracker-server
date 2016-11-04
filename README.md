@@ -8,27 +8,37 @@ Puck tracker server.
 
 Requirements:
 
-* [nvm](https://github.com/creationix/nvm)
+* node v5 or v6
+* mongodb
 
 ```
-nvm install 4
 yum -y groupinstall 'Development Tools
 sudo yum install krb5-devel
-npm install
-```
-## API:
-Make requests via popup and curl command. e.g.
-```
-a=$(zenity --entry --text="PLEASE SCAN YOUR DEWAR NOW")
-
-server="SR03BM01HU04WEB01:8080/actions"
-header="Content-Type: Application/json"
-
-curl --header "$header" --data "$a" $server
+npm install -g yarn
+yarn
 ```
 
 ## Running
 
 ```
 NODE_ENV=production npm start
+```
+
+## Development
+
+```
+cp config.example.js config.js
+cp bin/pucks.example.json bin/pucks.json
+NODE_ENV=development npm start
+```
+
+## API
+
+Make requests via popup and curl command:
+
+```
+action=$(zenity --entry --text="PLEASE SCAN YOUR DEWAR NOW")
+server="SR03BM01HU04WEB01:8080/actions"
+header="Content-Type: Application/json"
+curl --header "$header" --data "$action" $server
 ```
