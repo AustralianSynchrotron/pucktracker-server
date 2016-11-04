@@ -1,6 +1,6 @@
 {
   "name": "pucktracker-server",
-  "version": "0.8.0",
+  "version": "1.0.0",
   "description": "Puck tracker server",
   "main": "index.js",
   "scripts": {
