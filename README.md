@@ -27,10 +27,15 @@ NODE_ENV=production npm start
 ## Development
 
 ```
-cp config.example.js config.js
-cp bin/pucks.example.json bin/pucks.json
-NODE_ENV=development npm start
+docker-compose -f docker-compose.dev.yml up -d --build
 ```
+
+Test:
+
+```
+docker-compose -f docker-compose.dev.yml run server test
+```
+
 
 ## API
 

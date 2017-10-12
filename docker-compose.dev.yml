@@ -1,0 +1,9 @@
+version: "3"
+services:
+  db:
+    image: mongo
+  server:
+    build: .
+    ports:
+      - "8000:8000"
+      - "8100:8100"
