@@ -178,6 +178,20 @@ describe('controller', () => {
 
   })
 
+  it('adds adaptors', done => {
+    const action = {
+      type: 'ADD_ADAPTOR',
+      adaptor: {name: 'AS-01'},
+    }
+    handleAction(action).then(() => {
+      return Adaptor.findOne((err, adaptor) => {
+        expect(adaptor.name).to.equal('AS-01')
+        done()
+      })
+    }).catch(done)
+  })
+
+
   it('updates adaptor places', done => {
     Adaptor.create({name: 'AS-01', location: 'LS3000', position: 'A'}).then(() => {
       const action = {

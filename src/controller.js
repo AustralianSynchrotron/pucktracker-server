@@ -44,6 +44,9 @@ export function handleAction(action) {
         {filledTime: action.time || new Date()}
       )
     }
+    case 'ADD_ADAPTOR': {
+      return Adaptor.create(action.adaptor)
+    }
     case 'SET_ADAPTOR_PLACE': {
       return Adaptor.findOneAndUpdate(
         {name: action.adaptor},
