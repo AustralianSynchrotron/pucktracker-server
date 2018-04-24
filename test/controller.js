@@ -77,7 +77,7 @@ describe('controller', () => {
             expect(dewar).to.equal(null)
             done()
           })
-        })
+        }).catch(done)
       })
     })
 
@@ -191,6 +191,39 @@ describe('controller', () => {
     }).catch(done)
   })
 
+  describe('DELETE_ADAPTOR', () => {
+
+    it('deletes adaptors', done => {
+      Adaptor.create({name: 'AS-01'}).then(() => {
+        const action = {
+          type: 'DELETE_ADAPTOR',
+          adaptor: 'AS-01',
+        }
+        handleAction(action).then(() => {
+          Adaptor.findOne((err, adaptor) => {
+            expect(adaptor).to.equal(null)
+            done()
+          })
+        }).catch(done)
+      })
+    })
+
+    it('clears pucks adaptors', done => {
+      Promise.all([
+        Adaptor.create({name: 'AS-01'}),
+        Puck.create({name: 'ASP001', receptacleType: 'adaptor', receptacle: 'AS-01'}),
+      ]).then(() => {
+        handleAction({type: 'DELETE_ADAPTOR', adaptor: 'AS-01'}).then(() => {
+          Puck.findOne((err, puck) => {
+            expect(puck.receptacleType).to.equal(null)
+            expect(puck.receptacle).to.equal(null)
+            done()
+          })
+        }).catch(done)
+      })
+    })
+
+  })
 
   it('updates adaptor places', done => {
     Adaptor.create({name: 'AS-01', location: 'LS3000', position: 'A'}).then(() => {

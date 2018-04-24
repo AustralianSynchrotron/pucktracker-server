@@ -47,6 +47,13 @@ export function handleAction(action) {
     case 'ADD_ADAPTOR': {
       return Adaptor.create(action.adaptor)
     }
+    case 'DELETE_ADAPTOR': {
+      return Adaptor.remove({name: action.adaptor}).then(
+        () => Puck.update({receptacle: action.adaptor, receptacleType: 'adaptor'},
+                          {receptacle: null, receptacleType: null, slot: null},
+                          {multi: true})
+      )
+    }
     case 'SET_ADAPTOR_PLACE': {
       return Adaptor.findOneAndUpdate(
         {name: action.adaptor},
