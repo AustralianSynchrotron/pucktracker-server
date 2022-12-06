@@ -22,7 +22,7 @@
   "homepage": "https://github.com/AustralianSynchrotron/pucktracker-server#readme",
   "dependencies": {
     "body-parser": "1.15.0",
-    "express": "4.13.4",
+    "express": "4.17.3",
     "mongoose": "4.4.10",
     "socket.io": "1.4.5"
   },
